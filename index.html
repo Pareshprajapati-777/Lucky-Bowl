@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Spin Luck - 3D Glass Bowl Lucky Draw</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <!-- Ambient background lighting -->
+  <div class="ambient-glow ambient-glow-1"></div>
+  <div class="ambient-glow ambient-glow-2"></div>
+
+  <!-- Three.js 3D Viewport Container -->
+  <div id="webgl-container"></div>
+
+  <!-- UI Overlay Layer -->
+  <div class="ui-layer">
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>SPIN LUCK</h1>
+          <p>3D Glass Bowl Lucky Draw • लकी चिट</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="badge-chits">
+          <span class="badge-dot"></span>
+          <span id="hud-chit-count">8 Chits Inside</span>
+        </div>
+
+        <button id="sound-toggle" class="icon-btn active" title="Toggle Sound FX">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          <span>Sound ON</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Interactive Prompt -->
+    <div class="center-prompt">
+      <div class="prompt-pill">
+        <span>✨</span>
+        <span>Click the glass bowl or press <strong>Draw Lucky Chit</strong></span>
+        <span>✨</span>
+      </div>
+    </div>
+
+    <!-- Camera Control Dock -->
+    <aside class="camera-dock">
+      <button class="cam-btn active" data-view="cinematic" data-tooltip="Cinematic Orbit" title="Cinematic Orbit">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+      </button>
+      <button class="cam-btn" data-view="top" data-tooltip="Top-Down Bowl View" title="Top-Down View">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+      </button>
+      <button class="cam-btn" data-view="closeup" data-tooltip="Close-Up Focus" title="Close-Up Focus">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+    </aside>
+
+    <!-- Bottom Floating Action Dock -->
+    <footer class="bottom-dock">
+      <div class="dock-container">
+        <button id="shuffle-btn" class="btn-secondary" title="Shake and shuffle chits in bowl">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          <span>Shuffle Bowl</span>
+        </button>
+
+        <button id="draw-btn" class="btn-draw-main">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
+          <span>Draw Lucky Chit / पर्ची निकालें</span>
+        </button>
+
+        <button id="manage-btn" class="btn-secondary" title="Manage Names in Bowl">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Names</span>
+        </button>
+
+        <button id="history-btn" class="btn-secondary" title="View Draw History">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>History</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Screen-Centered Chit Opening Stage -->
+  <div id="screen-chit-modal" class="chit-screen-overlay">
+    <div class="chit-screen-backdrop" id="screen-chit-backdrop"></div>
+    <div class="chit-screen-container">
+      <!-- Ambient Golden Light behind chit -->
+      <div class="chit-ambient-halo"></div>
+
+      <!-- Close button on top right of modal -->
+      <button id="screen-chit-close" class="chit-screen-close" title="Close (Esc)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- 3D Perspective Paper Chit on Screen -->
+      <div id="chit-interactive-wrapper" class="chit-wrapper state-folded">
+        
+        <!-- Top Fold Flap -->
+        <div class="chit-flap chit-flap-top">
+          <div class="flap-face flap-front">
+            <div class="flap-crease-highlight"></div>
+            <div class="flap-gold-stripe"></div>
+          </div>
+          <div class="flap-face flap-back">
+            <div class="flap-parchment-inner"></div>
+          </div>
+        </div>
+
+        <!-- Center Parchment Note (The Revealed Content) -->
+        <div class="chit-parchment">
+          <!-- Ornate Filigree Borders -->
+          <div class="parchment-border"></div>
+          <div class="parchment-inner-border"></div>
+          
+          <!-- Corner Filigree Ornaments -->
+          <div class="corner-ornament corner-tl"></div>
+          <div class="corner-ornament corner-tr"></div>
+          <div class="corner-ornament corner-bl"></div>
+          <div class="corner-ornament corner-br"></div>
+
+          <!-- Note Content -->
+          <div class="parchment-content">
+            <div class="parchment-header-tag">✦ SPIN LUCK • LUCKY CHIT ✦</div>
+            <div class="parchment-sub">OFFICIAL LUCKY DRAW • भाग्यशाली पर्ची</div>
+            
+            <div class="parchment-divider">
+              <span class="divider-line"></span>
+              <span class="divider-diamond">✦</span>
+              <span class="divider-line"></span>
+            </div>
+
+            <!-- The Winner's Name Display -->
+            <div class="parchment-winner-wrap">
+              <div class="winner-label">SELECTED WINNER</div>
+              <div id="screen-winner-name" class="parchment-winner-name">PARESH</div>
+              <div class="winner-congrats">🎉 बधाई हो! CONGRATULATIONS! 🎉</div>
+            </div>
+
+            <!-- Official Gold Wax Stamp & Info -->
+            <div class="parchment-seal-row">
+              <div class="parchment-seal-stamp">
+                <div class="seal-inner-circle">
+                  <div class="seal-star">★</div>
+                  <div class="seal-text">VERIFIED<br>WINNER</div>
+                </div>
+              </div>
+              <div class="parchment-meta">
+                <span id="screen-bowl-count" class="meta-count">8 chits in bowl</span>
+                <span class="meta-quote">“Fortune Favours The Bold”</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Fold Flap -->
+        <div class="chit-flap chit-flap-bottom">
+          <div class="flap-face flap-front">
+            <div class="flap-crease-highlight"></div>
+            <div class="flap-gold-stripe"></div>
+          </div>
+          <div class="flap-face flap-back">
+            <div class="flap-parchment-inner"></div>
+          </div>
+        </div>
+
+        <!-- Gold Wax Seal (holds the folded chit together) -->
+        <div class="chit-gold-seal" id="chit-seal">
+          <div class="seal-ribbon"></div>
+          <div class="seal-body">
+            <div class="seal-icon">✦</div>
+            <div class="seal-text-tiny">SPIN LUCK</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons below the chit on screen -->
+      <div class="screen-chit-actions" id="screen-chit-actions">
+        <button id="winner-draw-again" class="btn-chit-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          <span>Keep in Bowl & Draw Again</span>
+        </button>
+
+        <button id="winner-remove-draw" class="btn-chit-danger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Remove Winner from Bowl</span>
+        </button>
+
+        <button id="winner-copy-btn" class="btn-chit-secondary" title="Copy Winner Name">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          <span>Copy Name</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Names Management Drawer -->
+  <div id="manage-drawer" class="app-drawer">
+    <div class="drawer-backdrop"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title-wrap">
+          <h2>Manage Names</h2>
+          <span id="names-drawer-count" class="badge-count">8 Names</span>
+        </div>
+        <button class="drawer-close" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Add Name Form -->
+      <form id="add-name-form" class="add-form">
+        <input type="text" id="new-name-input" class="input-name" placeholder="Enter name to add to bowl..." maxlength="24" required autocomplete="off">
+        <button type="submit" class="btn-add">Add</button>
+      </form>
+
+      <!-- Names Chip List -->
+      <div id="names-chip-list" class="names-list"></div>
+
+      <!-- Reset default button -->
+      <button id="reset-default-btn" class="btn-reset-default">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>Reset to Default 8 Names (Paresh, Deepak, etc.)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Draw History Drawer -->
+  <div id="history-drawer" class="app-drawer">
+    <div class="drawer-backdrop"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title-wrap">
+          <h2>Draw History</h2>
+          <span id="history-drawer-count" class="badge-count">0 Drawn</span>
+        </div>
+        <button class="drawer-close" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div id="history-list" class="history-list"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="app-toast" class="toast-msg"></div>
+
+  <!-- Main Application Entry Script -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

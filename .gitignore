@@ -1,0 +1,9 @@
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.claude/
+.gemini/
+.vscode/
+.idea/
+*.log
