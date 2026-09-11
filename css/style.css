@@ -52,6 +52,7 @@ html, body {
   color: var(--text-main);
   font-family: var(--font-sans);
   user-select: none;
+  touch-action: manipulation;
 }
 
 /* 3D Canvas Container */
@@ -62,6 +63,14 @@ html, body {
   width: 100%;
   height: 100%;
   z-index: 1;
+  touch-action: none;
+}
+
+#webgl-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none;
 }
 
 /* Background Ambient Glows */
@@ -99,7 +108,7 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 24px;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
 }
 
 /* Top Navigation Bar */
@@ -317,11 +326,11 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 16px;
   pointer-events: auto;
-  max-width: 800px;
+  max-width: 840px;
   margin: 0 auto;
   width: 100%;
+  z-index: 20;
 }
 
 .dock-container {
@@ -335,10 +344,25 @@ html, body {
   padding: 10px 18px;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
 }
 
-/* Main Draw Button */
+/* On desktop, dock-utility-row buttons sit inline alongside draw button */
+.dock-utility-row {
+  display: contents;
+}
+
+button.mobile-cam-btn {
+  display: none;
+}
+
+/* Order on desktop: Shuffle, Draw, Names, History */
+#shuffle-btn {
+  order: 1;
+}
+
 .btn-draw-main {
+  order: 2;
   background: var(--gold-gradient);
   color: #171100;
   font-family: var(--font-sans);
@@ -350,11 +374,23 @@ html, body {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.45);
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+#manage-btn {
+  order: 3;
+}
+
+#history-btn {
+  order: 4;
 }
 
 .btn-draw-main:hover {
@@ -379,6 +415,7 @@ html, body {
   border-top-color: #000;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
 @keyframes spin {
@@ -397,14 +434,21 @@ html, body {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.96);
 }
 
 /* Drawers (Side Panels for Names & History) */
@@ -1176,10 +1220,12 @@ html, body {
 /* Action Buttons below Chit */
 .screen-chit-actions {
   display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 24px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  margin-top: 20px;
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
@@ -1197,60 +1243,86 @@ html, body {
   color: #171100;
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 0.94rem;
-  padding: 12px 24px;
+  font-size: 0.96rem;
+  padding: 13px 28px;
   border-radius: var(--radius-full);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  touch-action: manipulation;
 }
 
 .btn-chit-primary:hover {
-  transform: translateY(-2px) scale(1.03);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: 0 0 35px rgba(255, 215, 0, 0.75);
 }
 
+.btn-chit-primary:active {
+  transform: scale(0.98);
+}
+
+.chit-actions-secondary {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
 .btn-chit-danger {
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  flex: 1;
+  background: rgba(220, 38, 38, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.45);
   color: #fca5a5;
   font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 0.9rem;
-  padding: 12px 20px;
+  font-size: 0.88rem;
+  padding: 11px 18px;
   border-radius: var(--radius-full);
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .btn-chit-danger:hover {
-  background: rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.32);
   border-color: #ef4444;
   color: #fff;
   transform: translateY(-1px);
 }
 
+.btn-chit-danger:active {
+  transform: scale(0.98);
+}
+
 .btn-chit-secondary {
+  flex: 1;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-glass);
   color: #fff;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.9rem;
-  padding: 12px 18px;
+  font-size: 0.88rem;
+  padding: 11px 18px;
   border-radius: var(--radius-full);
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .btn-chit-secondary:hover {
@@ -1259,31 +1331,14 @@ html, body {
   transform: translateY(-1px);
 }
 
-/* Responsive Scaling for Chit Opening */
-@media (max-width: 600px) {
-  .chit-wrapper.state-unfolding,
-  .chit-wrapper.state-open {
-    width: 95vw;
-    max-width: 380px;
-    height: 400px;
-  }
-  .parchment-winner-name {
-    font-size: 2.2rem;
-  }
-  .screen-chit-actions {
-    flex-direction: column;
-    width: 100%;
-    align-items: stretch;
-  }
-  .btn-chit-primary, .btn-chit-danger, .btn-chit-secondary {
-    justify-content: center;
-  }
+.btn-chit-secondary:active {
+  transform: scale(0.98);
 }
 
 /* Toast notification */
 .toast-msg {
   position: fixed;
-  top: 24px;
+  top: max(20px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%) translateY(-100px);
   background: #1e2538;
@@ -1297,6 +1352,8 @@ html, body {
   box-shadow: var(--shadow-lg);
   pointer-events: none;
   opacity: 0;
+  max-width: 90vw;
+  text-align: center;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1305,26 +1362,353 @@ html, body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* Responsive adjustments */
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES (Mobile & Tablet Optimization)
+   ========================================================= */
+
+/* Tablet & Smaller (<= 768px) */
 @media (max-width: 768px) {
-  .ui-layer {
-    padding: 14px;
-  }
-  .brand-text p {
-    display: none;
-  }
   .camera-dock {
     display: none;
   }
+  button.mobile-cam-btn {
+    display: flex;
+  }
+}
+
+/* Mobile Screens (<= 640px) */
+@media (max-width: 640px) {
+  .ui-layer {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  /* Compact Top Navigation Bar */
+  .top-nav {
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    gap: 8px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .brand-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .brand-text h1 {
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+  }
+
+  .brand-text p {
+    display: none;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+
+  .badge-chits {
+    padding: 5px 10px;
+    font-size: 0.78rem;
+    gap: 6px;
+  }
+
+  .badge-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .icon-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+
+  .icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Floating Instruction Prompt */
+  .center-prompt {
+    margin-top: 6px;
+  }
+
+  .prompt-pill {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    gap: 6px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Mobile 2-Tier Bottom Dock */
+  .bottom-dock {
+    width: 100%;
+    padding: 0;
+  }
+
+  .dock-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 440px;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 22px;
+    background: rgba(16, 20, 32, 0.88);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(212, 175, 55, 0.15);
+  }
+
+  /* Tier 1: Prominent Gold Draw CTA */
   .btn-draw-main {
-    padding: 12px 22px;
+    width: 100%;
+    order: 1;
+    padding: 14px 20px;
+    font-size: 1rem;
+    border-radius: 14px;
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.5);
+    min-height: 48px;
+  }
+
+  .btn-draw-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .btn-draw-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* Tier 2: 4-Item Utility Row */
+  .dock-utility-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    width: 100%;
+    order: 2;
+  }
+
+  .btn-secondary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 2px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    min-height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-secondary svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* On-Screen Chit Modal Responsive Adaptation */
+  .chit-screen-overlay {
+    padding: max(16px, env(safe-area-inset-top)) 10px max(16px, env(safe-area-inset-bottom)) 10px;
+    overflow-y: auto;
+  }
+
+  .chit-screen-container {
+    max-height: 94vh;
+    width: 100%;
+  }
+
+  .chit-screen-close {
+    position: absolute;
+    top: max(10px, env(safe-area-inset-top));
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    background: rgba(18, 22, 34, 0.85);
+    border: 1px solid var(--border-gold);
+    color: var(--gold-light);
+    z-index: 50;
+  }
+
+  .chit-ambient-halo {
+    width: 320px;
+    height: 320px;
+  }
+
+  .chit-wrapper {
+    width: min(280px, 80vw);
+    height: 150px;
+  }
+
+  .chit-wrapper.state-unfolding,
+  .chit-wrapper.state-open {
+    width: min(92vw, 360px);
+    height: min(390px, 48vh);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(212, 175, 55, 0.35);
+  }
+
+  .parchment-content {
+    padding: 12px 10px;
+  }
+
+  .parchment-header-tag {
+    font-size: 0.82rem;
+    letter-spacing: 2px;
+  }
+
+  .parchment-sub {
+    font-size: 0.68rem;
+  }
+
+  .parchment-divider {
+    margin: 6px 0 8px;
+    width: 80%;
+  }
+
+  .winner-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+  }
+
+  .parchment-winner-name {
+    font-size: clamp(1.75rem, 6.5vw, 2.4rem);
+    margin: 2px 0 4px;
+    line-height: 1.08;
+    max-width: 90%;
+    word-break: break-word;
+  }
+
+  .winner-congrats {
+    font-size: 0.82rem;
+  }
+
+  .parchment-seal-row {
+    margin-top: 4px;
+    padding-top: 6px;
+  }
+
+  .parchment-seal-stamp {
+    width: 42px;
+    height: 42px;
+  }
+
+  .seal-inner-circle {
+    width: 34px;
+    height: 34px;
+  }
+
+  .meta-count {
+    font-size: 0.72rem;
+  }
+
+  .meta-quote {
+    font-size: 0.65rem;
+  }
+
+  .screen-chit-actions {
+    width: min(92vw, 360px);
+    margin-top: 14px;
+    gap: 8px;
+  }
+
+  .btn-chit-primary {
+    padding: 12px 18px;
+    font-size: 0.92rem;
+  }
+
+  .chit-actions-secondary {
+    gap: 8px;
+  }
+
+  .btn-chit-danger,
+  .btn-chit-secondary {
+    padding: 10px 10px;
+    font-size: 0.8rem;
+  }
+
+  /* Drawers on Mobile (Full Width Slide-In) */
+  .app-drawer {
+    max-width: 100%;
+  }
+
+  .drawer-content {
+    max-width: 100%;
+    width: 100%;
+    padding: 22px 18px max(24px, env(safe-area-inset-bottom)) 18px;
+  }
+
+  .input-name {
+    font-size: 16px; /* Prevents auto-zoom in iOS Safari */
+    padding: 12px 14px;
+  }
+
+  .chip-del {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+/* Extra Compact Screens (<= 380px) */
+@media (max-width: 380px) {
+  .brand-text h1 {
     font-size: 0.95rem;
   }
-  .dock-container {
-    gap: 8px;
+
+  .icon-btn .btn-text {
+    display: none;
+  }
+
+  .badge-chits {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .btn-draw-text {
+    font-size: 0.88rem;
+  }
+
+  .dock-utility-row {
+    gap: 4px;
+  }
+
+  .btn-secondary {
+    font-size: 0.68rem;
+    padding: 6px 1px;
+  }
+}
+
+/* Landscape / Short Viewports (<= 680px height) */
+@media (max-height: 680px) {
+  .ui-layer {
     padding: 8px 12px;
   }
-  .winner-name {
-    font-size: 2rem;
+
+  .center-prompt {
+    display: none;
+  }
+
+  .chit-wrapper.state-unfolding,
+  .chit-wrapper.state-open {
+    height: min(340px, 60vh);
+  }
+
+  .parchment-winner-name {
+    font-size: 1.8rem;
+  }
+
+  .screen-chit-actions {
+    margin-top: 8px;
   }
 }

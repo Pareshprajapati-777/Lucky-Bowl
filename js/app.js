@@ -156,7 +156,7 @@ class SpinLuckApp {
     const addNameForm = document.getElementById('add-name-form');
     const newNameInput = document.getElementById('new-name-input');
 
-    // Camera view buttons
+    // Camera view buttons (Desktop)
     document.querySelectorAll('.cam-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         soundEngine.playClick();
@@ -166,6 +166,20 @@ class SpinLuckApp {
         this.scene.setCameraPreset(view);
       });
     });
+
+    // Mobile Camera View Toggle button in dock
+    const mobileCamBtn = document.getElementById('mobile-cam-btn');
+    if (mobileCamBtn) {
+      mobileCamBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        const nextView = this.scene.cycleCameraPreset();
+        document.querySelectorAll('.cam-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.view === nextView);
+        });
+        const viewLabel = nextView === 'top' ? 'Top View' : (nextView === 'closeup' ? 'Close-Up' : 'Cinematic');
+        this.showToast(`Camera: ${viewLabel}`);
+      });
+    }
 
     // Draw Trigger
     drawBtn.addEventListener('click', () => this.drawLuckyChit());
@@ -303,7 +317,7 @@ class SpinLuckApp {
     drawBtn.classList.add('disabled');
     drawBtn.innerHTML = `
       <span class="btn-spinner"></span>
-      <span>Picking Lucky Chit...</span>
+      <span class="btn-draw-text">Picking Lucky Chit...</span>
     `;
 
     // Start 3D Levitation Animation (Hand Removed!)
@@ -341,8 +355,8 @@ class SpinLuckApp {
     const drawBtn = document.getElementById('draw-btn');
     drawBtn.classList.remove('disabled');
     drawBtn.innerHTML = `
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
-      <span>Draw Lucky Chit / पर्ची निकालें</span>
+      <svg class="btn-draw-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
+      <span class="btn-draw-text">Draw Lucky Chit • पर्ची निकालें</span>
     `;
   }
 
@@ -522,7 +536,7 @@ class SpinLuckApp {
   updateHUD() {
     const hudBadge = document.getElementById('hud-chit-count');
     if (hudBadge) {
-      hudBadge.textContent = `${this.names.length} Chits Inside`;
+      hudBadge.textContent = `${this.names.length} Chits`;
     }
   }
 
@@ -532,13 +546,13 @@ class SpinLuckApp {
       btn.classList.add('active');
       btn.innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-        <span>Sound ON</span>
+        <span class="btn-text">Sound ON</span>
       `;
     } else {
       btn.classList.remove('active');
       btn.innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-        <span>Muted</span>
+        <span class="btn-text">Muted</span>
       `;
     }
   }

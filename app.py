@@ -237,6 +237,53 @@ st.markdown("""
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.08);
     }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 0.6rem;
+            padding-bottom: 1rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .spin-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+        }
+        .spin-header-brand {
+            gap: 12px;
+        }
+        .spin-icon-box {
+            width: 38px;
+            height: 38px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+        .spin-title {
+            font-size: 19px;
+            letter-spacing: 1.5px;
+        }
+        .spin-subtitle {
+            font-size: 11px;
+        }
+        .spin-badges {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 6px;
+        }
+        .spin-pill {
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+        .viewport-card {
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 

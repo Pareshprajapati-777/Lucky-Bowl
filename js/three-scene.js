@@ -26,6 +26,7 @@ export class ThreeScene {
     // Interaction & Orbit
     this.isDragging = false;
     this.previousMousePosition = { x: 0, y: 0 };
+    this.currentPreset = 'cinematic';
     this.cameraRotation = { theta: 0.15, phi: 0.42, radius: 7.2 };
     this.targetRotation = { theta: 0.15, phi: 0.42, radius: 7.2 };
     this.raycaster = new THREE.Raycaster();
@@ -36,6 +37,23 @@ export class ThreeScene {
     this.sparkleSystem = null;
 
     this.init();
+  }
+
+  getBaseRadius() {
+    const w = this.container ? (this.container.clientWidth || window.innerWidth) : window.innerWidth;
+    const h = this.container ? (this.container.clientHeight || window.innerHeight) : window.innerHeight;
+    const aspect = w / Math.max(1, h);
+    if (aspect < 1.0) {
+      return 7.2 * Math.max(1.0, Math.min(1.65, 0.96 / aspect));
+    }
+    return 7.2;
+  }
+
+  getLookAtY() {
+    const w = this.container ? (this.container.clientWidth || window.innerWidth) : window.innerWidth;
+    const h = this.container ? (this.container.clientHeight || window.innerHeight) : window.innerHeight;
+    const aspect = w / Math.max(1, h);
+    return aspect < 1.0 ? 0.72 : 0.9;
   }
 
   init() {
@@ -49,6 +67,9 @@ export class ThreeScene {
     const height = this.container.clientHeight || window.innerHeight || 800;
     const aspect = width / height;
     this.camera = new THREE.PerspectiveCamera(44, aspect, 0.1, 100);
+    const initialRadius = this.getBaseRadius();
+    this.cameraRotation.radius = initialRadius;
+    this.targetRotation.radius = initialRadius;
     this.updateCameraPosition();
 
     // 3. Renderer
@@ -601,37 +622,114 @@ export class ThreeScene {
       }
     };
 
-    // DOM events
+    // DOM events: Mouse orbit
     dom.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
     window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
     window.addEventListener('mouseup', onUp);
 
+    // Touch events with single-finger orbit and two-finger pinch-to-zoom
+    let touchStartDist = 0;
+    let initialRadius = 7.2;
+
     dom.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY);
+      if (e.touches.length === 1) {
+        onDown(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+        this.isDragging = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchStartDist = Math.hypot(dx, dy);
+        initialRadius = this.targetRotation.radius;
+      }
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY);
+      if (e.touches.length === 1) {
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2 && touchStartDist > 0) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const currentDist = Math.hypot(dx, dy);
+        const pinchRatio = touchStartDist / Math.max(10, currentDist);
+        this.targetRotation.radius = Math.max(3.8, Math.min(14.0, initialRadius * pinchRatio));
+      }
     }, { passive: true });
 
-    window.addEventListener('touchend', onUp);
+    window.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        onUp();
+        touchStartDist = 0;
+      } else if (e.touches.length === 1) {
+        // Switch back to single finger drag
+        onDown(e.touches[0].clientX, e.touches[0].clientY);
+        touchStartDist = 0;
+      }
+    });
+
     dom.addEventListener('click', onClick);
 
     // Zoom on wheel
     dom.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.targetRotation.radius = Math.max(3.5, Math.min(12.0, this.targetRotation.radius + e.deltaY * 0.005));
+      this.targetRotation.radius = Math.max(3.5, Math.min(13.0, this.targetRotation.radius + e.deltaY * 0.005));
     }, { passive: false });
 
-    // Resize
+    // Responsive resize with aspect ratio re-framing
     window.addEventListener('resize', () => {
       if (!this.container) return;
-      const w = this.container.clientWidth;
-      const h = this.container.clientHeight;
-      this.camera.aspect = w / h;
+      const w = this.container.clientWidth || window.innerWidth;
+      const h = this.container.clientHeight || window.innerHeight;
+      this.camera.aspect = w / Math.max(1, h);
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(w, h);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      // Re-adapt radius if in default cinematic preset
+      if (!this.currentPreset || this.currentPreset === 'cinematic') {
+        const baseR = this.getBaseRadius();
+        this.targetRotation.radius = baseR;
+      }
     });
+  }
+
+  setCameraPreset(viewName) {
+    this.currentPreset = viewName;
+    const baseR = this.getBaseRadius();
+    if (viewName === 'top') {
+      gsap.to(this.targetRotation, {
+        theta: 0,
+        phi: 0.1,
+        radius: baseR * 0.9,
+        duration: 0.9,
+        ease: 'power2.out'
+      });
+    } else if (viewName === 'closeup') {
+      gsap.to(this.targetRotation, {
+        theta: 0.35,
+        phi: 0.52,
+        radius: baseR * 0.65,
+        duration: 0.9,
+        ease: 'power2.out'
+      });
+    } else {
+      // cinematic default
+      gsap.to(this.targetRotation, {
+        theta: 0.15,
+        phi: 0.42,
+        radius: baseR,
+        duration: 0.9,
+        ease: 'power2.out'
+      });
+    }
+  }
+
+  cycleCameraPreset() {
+    const presets = ['cinematic', 'top', 'closeup'];
+    const current = this.currentPreset || 'cinematic';
+    const nextIdx = (presets.indexOf(current) + 1) % presets.length;
+    const nextPreset = presets[nextIdx];
+    this.setCameraPreset(nextPreset);
+    return nextPreset;
   }
 
   updateCameraPosition() {
@@ -648,7 +746,7 @@ export class ThreeScene {
     this.camera.position.y = r * Math.cos(phi) + 0.4;
     this.camera.position.z = r * Math.sin(phi) * Math.cos(theta);
 
-    this.camera.lookAt(0, 0.9, 0);
+    this.camera.lookAt(0, this.getLookAtY(), 0);
   }
 
   animate() {
